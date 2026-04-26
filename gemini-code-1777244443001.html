@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <title>Latihan Sebutan Bahasa Melayu</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(135deg, #74ebd5 0%, #9face6 100%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 500px;
+        }
+        h2 { color: #4a4a4a; margin-bottom: 10px; }
+        #index-info { color: #888; font-size: 14px; margin-bottom: 20px; }
+        #target-text {
+            font-size: 28px;
+            color: #2c3e50;
+            font-weight: bold;
+            margin: 20px 0;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #3498db;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        button {
+            padding: 15px 40px;
+            font-size: 20px;
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+            transition: 0.2s;
+        }
+        button:active { transform: scale(0.95); }
+        #feedback {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            height: 25px;
+        }
+        .user-transcript {
+            margin-top: 10px;
+            color: #57606f;
+            font-style: italic;
+        }
+        .correct { color: #2ed573; }
+        .wrong { color: #ff4757; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Latihan Sebutan</h2>
+    <div id="index-info">Ayat 1 daripada 18</div>
+    
+    <div id="target-text">Memuatkan...</div>
+    
+    <button onclick="startListening()">🎤 Tekan & Sebut</button>
+    
+    <div id="feedback"></div>
+    <div id="user-said" class="user-transcript"></div>
+</div>
+
+<script>
+    // Senarai input dari anda
+    const senarai = [
+        "Nyonya itu sedang menyanyi",
+        "Jangan pegang pisau itu",
+        "Menyahut",
+        "Masukkan tauge itu ke dalam kuali",
+        "Ali sedang mengayuh basikal sambil menghafal sifir",
+        "Imbau kenangan",
+        "Kalau sudah makan, sila simpan bekas anda",
+        "Amboi, rajinnya kamu",
+        "Mengaum",
+        "Syiling",
+        "Aurum",
+        "Jangan berlengah",
+        "Ungu",
+        "Dunia khayalan",
+        "Syarat",
+        "Menyusur",
+        "ditengah",
+        "Apa khabar kamu"
+    ];
+
+    let currentIndex = 0;
+    const targetDiv = document.getElementById('target-text');
+    const feedbackDiv = document.getElementById('feedback');
+    const userSaidDiv = document.getElementById('user-said');
+    const indexInfo = document.getElementById('index-info');
+
+    function updateDisplay() {
+        targetDiv.innerText = senarai[currentIndex];
+        indexInfo.innerText = `Ayat ${currentIndex + 1} daripada ${senarai.length}`;
+        feedbackDiv.innerText = "";
+        userSaidDiv.innerText = "";
+    }
+
+    // Mulakan paparan pertama
+    updateDisplay();
+
+    // Pengecaman Suara
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    
+    // PENTING: Set ke Bahasa Melayu
+    recognition.lang = 'ms-MY';
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+        feedbackDiv.innerText = "Sila sebut sekarang...";
+        feedbackDiv.className = "";
+    };
+
+    recognition.onresult = (event) => {
+        const result = event.results[0][0].transcript;
+        userSaidDiv.innerText = `Anda sebut: "${result}"`;
+
+        // Normalisasi teks untuk perbandingan adil
+        const cleanTarget = senarai[currentIndex].toLowerCase().replace(/[^\w\s]/g, "").trim();
+        const cleanResult = result.toLowerCase().replace(/[^\w\s]/g, "").trim();
+
+        if (cleanResult === cleanTarget) {
+            feedbackDiv.innerText = "✅ Hebat! Sebutan tepat.";
+            feedbackDiv.className = "correct";
+            
+            // Pergi ke ayat seterusnya selepas 2 saat
+            setTimeout(() => {
+                if (currentIndex < senarai.length - 1) {
+                    currentIndex++;
+                    updateDisplay();
+                } else {
+                    targetDiv.innerText = "🎉 Tahniah! Anda selesai.";
+                    indexInfo.innerText = "Semua sebutan telah berjaya.";
+                }
+            }, 2000);
+        } else {
+            feedbackDiv.innerText = "❌ Cuba lagi, pastikan jelas.";
+            feedbackDiv.className = "wrong";
+        }
+    };
+
+    recognition.onerror = (event) => {
+        feedbackDiv.innerText = "Ralat: " + event.error;
+    };
+
+    function startListening() {
+        recognition.start();
+    }
+</script>
+
+</body>
+</html>
